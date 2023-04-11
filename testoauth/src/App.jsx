@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react';
 import {Routes, Route, useLocation, useNavigate} from 'react-router-dom'
 import SpotifyPlayer from 'react-spotify-web-playback';
-
 import './App.css';
 
-const scope = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state'
-
+const clientid = '5afe486064b145c6a8c852bd53deea04'
+const redirect = process.env.REACT_APP_REDIRECT_URI
+const scope = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-library-read'
+const state = Math.floor(Math.random() * 10^3)
+const authLink = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientid}&scope=${scope}&redirect_uri=${redirect}&state=${state}`
+const baseURL = process.env.REACT_APP_BASE_URL
 function App() {
   const {state} = useLocation()
   const [token, setToken] = useState()
-  const [uris, setUris] = useState([])
+  const [musics, setMusics] = useState([])
+  const [selectedMusic, setSelected] = useState([])
+  const [apiUrl, setApiUrl] = useState("https://api.spotify.com/v1/me/tracks")
+
   useEffect(()=>{
+    
     if(localStorage.getItem("refreshToken")){
       let code = localStorage.getItem("refreshToken")
-      fetch("http://localhost:3030/refresh/"+code)
+      fetch(baseURL+"/refresh/"+code)
       .then(resp => resp.json())
       .then(resp => {
         //console.log("Token: ", resp)
@@ -22,7 +29,7 @@ function App() {
       .catch(err => console.log(err))
     }else{
       if(state){
-        fetch("http://localhost:3030/code/"+state.code)
+        fetch(baseURL+"/code/"+state.code)
         .then(resp => resp.json())
         .then(resp => {
           //console.log(resp)
@@ -32,11 +39,14 @@ function App() {
         .catch(err => console.log(err))
       }
     }
+    
+
+    
   }, [state])
 
   useEffect(()=>{
     if(token){
-      fetch("https://api.spotify.com/v1/me/tracks", {
+      fetch(apiUrl, {
         method: "GET",
         headers :{
             'Authorization': 'Bearer '+token
@@ -44,31 +54,42 @@ function App() {
     })
     .then(resp => resp.json())
     .then(resp => {
-      setUris(resp.items.map((music => music.track.uri)))
-      console.log(resp)
+      setApiUrl(resp?.next)
+      setMusics([...musics, ...resp?.items])
+
+      console.log(musics)
+      //console.log(resp) 
     })
     .catch(err => console.log(err))
     }
-    
-  }, [token])
+  }, [token, apiUrl])
   
 
   return (
       <Routes>
-        <Route path='/' element={<Login token={token} uris={uris} />} />
+        <Route path='/' element={<Login token={token} uris={selectedMusic} musics={musics} setSelected={ (e) => setSelected(e)} />} />
         <Route path='/callback' element={<Callback />}/>
       </Routes>
   );
 }
 
-function Login({token, uris}){
-  console.log(uris)
+function Login({token, uris, musics, setSelected}){
   return(
     <div className="App">
       <a 
-      href={`https://accounts.spotify.com/authorize?response_type=code&client_id=b50f78c07342454fb6b13c2988a6a987&scope=${scope}&redirect_uri=http://localhost:3000/callback&state=012313`}>
+      href={authLink}>
         Logar com Spotify
       </a>
+      <div className="musics">
+        {musics?.map((musica, i) =>{
+          return(
+            <button onClick={() => setSelected([musica.track.uri])} key={i}>
+              <img src={musica.track.album.images[2].url} alt={musica.track.name}/>
+              <h2>Música: {musica.track.name}</h2>
+            </button>
+          )
+        })}
+      </div>
       <SpotifyPlayer 
         token={token}
         uris={uris}
