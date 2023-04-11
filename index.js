@@ -44,7 +44,7 @@ app.get("/code/:code", cors(), (req,res) =>{
   });
 })
 
-app.get("/refresh/:code", cors(corsOptions), (req, res)=>{
+app.get("/refresh/:code", cors(), (req, res)=>{
   var code = req.params.code
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token',
