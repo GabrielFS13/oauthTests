@@ -40,6 +40,7 @@ app.get("/code/:code", cors(), (req,res) =>{
     }else{
       //console.log(body)
       console.log(response)
+      res.json(response)
     }
   });
 })
