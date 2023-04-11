@@ -9,16 +9,13 @@ const clientID = '5afe486064b145c6a8c852bd53deea04'
 const client_secret = process.env.clientSecret
 const redirect_uri = process.env.redirect_uri
 
-var corsOptions = {
-  origin: process.env.frontURL,
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+app.use(cors())
 
-app.get("/", cors(corsOptions), (req, res) =>{
+app.get("/", cors(), (req, res) =>{
   res.send('Hello World')
 })
 
-app.get("/code/:code", cors(corsOptions), (req,res) =>{
+app.get("/code/:code", cors(), (req,res) =>{
   console.log(req.params.code)
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token',
