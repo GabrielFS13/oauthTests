@@ -64,6 +64,7 @@ app.get("/refresh/:code", cors(), (req, res)=>{
 
     }else{
       console.log(body)
+      res.json(response)
     }
   });
 })
