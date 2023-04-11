@@ -12,7 +12,7 @@ const redirect_uri = process.env.redirect_uri
 app.use(cors())
 
 
-app.get("/code/:code", (req,res) =>{
+app.get("/code/:code", cors(), (req,res) =>{
   console.log(req.params.code)
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token',
@@ -41,7 +41,7 @@ app.get("/code/:code", (req,res) =>{
   });
 })
 
-app.get("/refresh/:code", (req, res)=>{
+app.get("/refresh/:code", cors(), (req, res)=>{
   var code = req.params.code
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token',
