@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import {Routes, Route, useLocation, useNavigate} from 'react-router-dom'
-import SpotifyPlayer from 'react-spotify-web-playback';
-import {BsFillPlayFill, BsSoundwave} from 'react-icons/bs'
-
 import './App.css';
+
+import Collection from './components/Collection';
 
 const clientid = '5afe486064b145c6a8c852bd53deea04'
 const redirect = process.env.REACT_APP_REDIRECT_URI
@@ -66,110 +65,19 @@ function App() {
 
   return (
       <Routes>
-        <Route path='/' element={<Home token={token} uris={selectedMusic} musics={musics} setSelected={ (e) => setSelected(e)} />} />
+        <Route path='/' element={
+          <Collection
+            token={token} 
+            uris={selectedMusic} 
+            musics={musics} 
+            setSelected={ (e) => setSelected(e)}
+            authLink = {authLink}
+          />} />
         <Route path='/callback' element={<Callback />}/>
       </Routes>
   );
 }
 
-function Home({token, uris, musics, setSelected}){
-  const [hover, setHover] = useState({i: null, hover: null})
-
-  function millisToMinutesAndSeconds(millis) {
-    var minutes = Math.floor(millis / 60000);
-    var seconds = ((millis % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
-  }
-
-  function formatDate(undate){
-    const months = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out" ,"nov", "dez"]
-    const date = new Date(undate)
-    const day = date.getDate()
-    const month = date.getMonth()
-    const year = date.getFullYear()
-
-    return `${day} de ${months[month]} de ${year}`
-  }
-  
-  return(
-    <div className="App">
-      {!token ? 
-      <a href={authLink}>
-        Logar com Spotify
-      </a>: ''}
-      <div className="musics">
-        <table border={0}>
-          <thead>
-            <tr>
-              <th className='header_button'>#</th>
-              <th className='header_title'>Título</th>
-              <th className='header_album'>Álbum</th>
-              <th className='header_added'>Adicionado em</th>
-              <th className='header_time'>Duração</th>
-            </tr>
-          </thead>
-          <tbody>
-            {musics?.map((musica, i) =>{
-            return(
-              <div 
-              className="track" 
-              onMouseEnter={() => {setHover({i: i, hover: <BsFillPlayFill />})}}
-              onMouseLeave={() => {setHover({i: null, hover: null})}}
-              >
-                <tr>
-                <td className='play_button header_button'>
-                  <button onClick={() => setSelected([musica.track.uri])} key={i} id={i}>
-                    { uris == musica.track.uri ? <BsSoundwave color="green" /> : hover.i === i ? hover.hover : i + 1 }
-                  </button>
-                </td>
-                <td className='header_title'>
-                  <div className="music_infos">
-                    <div className="img">
-                      <img src={musica.track.album.images[2].url} alt={musica.track.name}/>
-                    </div>
-                    <div className="music_title_artits">
-                      <span className='music_name'>{musica.track.name}</span>
-                      <span className='artist_name'>{musica.track.artists.map(artists => artists.name)}</span>
-                    </div>
-                  </div>
-                </td>
-                <td className='header_album'>
-                  <span className="album_name">{musica.track.album.name}</span>
-                </td>
-                <td className='header_added'>
-                  {formatDate(musica.added_at)}<br />
-                  {musica.added_at}
-                </td>
-                <td className='header_time'>
-                  {millisToMinutesAndSeconds(musica.track.duration_ms)}
-                </td>
-              </tr>
-              </div>
-            )
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div className="player">
-        <SpotifyPlayer 
-          token={token}
-          uris={uris}
-          initialVolume={0.1}
-          inlineVolume={true}
-          layout='responsive'
-          magnifySliderOnHover={true}
-          play={true}
-          styles={{
-            bgColor: "#242424",
-            color: "white",
-            trackNameColor: "white",
-            trackArtistColor: "grey"
-          }}
-        /> 
-      </div>
-    </div>
-  )
-}
 
 function Callback(){
   const navigate = useNavigate()

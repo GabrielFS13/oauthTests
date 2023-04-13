@@ -111,3 +111,13 @@ tr{
   color: white;
   font-size: 18px;
 }
+.play_button button:hover{
+  cursor: pointer;
+}
+.paused{
+  color: green;
+}
+
+.jorge{
+  color: red;
+}
