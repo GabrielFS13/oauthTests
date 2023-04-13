@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {Routes, Route, useLocation, useNavigate} from 'react-router-dom'
 import SpotifyPlayer from 'react-spotify-web-playback';
-import {BsFillPlayFill} from 'react-icons/bs'
+import {BsFillPlayFill, BsSoundwave} from 'react-icons/bs'
 
 import './App.css';
 
@@ -73,23 +73,24 @@ function App() {
 }
 
 function Home({token, uris, musics, setSelected}){
+  const [hover, setHover] = useState({i: null, hover: null})
 
-  const handlePlay = (e) => {
-    try{
-      e.target.childNodes[0].cells[0].childNodes[0].innerHTML = "Play"
-    }
-    catch{
-    }
+  function millisToMinutesAndSeconds(millis) {
+    var minutes = Math.floor(millis / 60000);
+    var seconds = ((millis % 60000) / 1000).toFixed(0);
+    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
   }
 
-  const handleLeave = (e, i) =>{
-    try{
-      e.target.childNodes[0].cells[0].childNodes[0].innerHTML = i + 1
-    }
-    catch{
-    }
-  }
+  function formatDate(undate){
+    const months = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out" ,"nov", "dez"]
+    const date = new Date(undate)
+    const day = date.getDate()
+    const month = date.getMonth()
+    const year = date.getFullYear()
 
+    return `${day} de ${months[month]} de ${year}`
+  }
+  
   return(
     <div className="App">
       {!token ? 
@@ -110,11 +111,15 @@ function Home({token, uris, musics, setSelected}){
           <tbody>
             {musics?.map((musica, i) =>{
             return(
-              <div className="track" onMouseEnter={handlePlay} onMouseLeave={(e) => handleLeave(e, i)}>
+              <div 
+              className="track" 
+              onMouseEnter={() => {setHover({i: i, hover: <BsFillPlayFill />})}}
+              onMouseLeave={() => {setHover({i: null, hover: null})}}
+              >
                 <tr>
                 <td className='play_button header_button'>
-                  <button onClick={() => setSelected([musica.track.uri])} key={i}>
-                    {i + 1}
+                  <button onClick={() => setSelected([musica.track.uri])} key={i} id={i}>
+                    { uris == musica.track.uri ? <BsSoundwave color="green" /> : hover.i === i ? hover.hover : i + 1 }
                   </button>
                 </td>
                 <td className='header_title'>
@@ -132,10 +137,11 @@ function Home({token, uris, musics, setSelected}){
                   <span className="album_name">{musica.track.album.name}</span>
                 </td>
                 <td className='header_added'>
+                  {formatDate(musica.added_at)}<br />
                   {musica.added_at}
                 </td>
                 <td className='header_time'>
-                  {musica.track.duration_ms}
+                  {millisToMinutesAndSeconds(musica.track.duration_ms)}
                 </td>
               </tr>
               </div>

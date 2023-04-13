@@ -58,12 +58,17 @@ th{
 
 tr{
   padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-tbody tr:hover{
+.track:hover{
   background-color: hsla(0,0%,100%,.3);
 }
-
+.track{
+  border-radius: 6px;
+}
 .player{
   height: 10vh;
 }
@@ -100,6 +105,9 @@ tbody tr:hover{
   padding: 10px;
 }
 
-.play_button{
-  text-align: center;
+.play_button button{
+  background-color: transparent;
+  border: 0;
+  color: white;
+  font-size: 18px;
 }
