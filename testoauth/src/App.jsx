@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import {Routes, Route, useLocation, useNavigate} from 'react-router-dom'
 import SpotifyPlayer from 'react-spotify-web-playback';
+import {BsFillPlayFill} from 'react-icons/bs'
+
 import './App.css';
 
 const clientid = '5afe486064b145c6a8c852bd53deea04'
@@ -9,6 +11,7 @@ const scope = 'streaming user-read-email user-read-private user-read-playback-st
 const state = Math.floor(Math.random() * 10^3)
 const authLink = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientid}&scope=${scope}&redirect_uri=${redirect}&state=${state}`
 const baseURL = process.env.REACT_APP_BASE_URL
+
 function App() {
   const {state} = useLocation()
   const [token, setToken] = useState()
@@ -17,7 +20,6 @@ function App() {
   const [apiUrl, setApiUrl] = useState("https://api.spotify.com/v1/me/tracks")
 
   useEffect(()=>{
-    
     if(localStorage.getItem("refreshToken")){
       let code = localStorage.getItem("refreshToken")
       fetch(baseURL+"/refresh/"+code)
@@ -39,9 +41,6 @@ function App() {
         .catch(err => console.log(err))
       }
     }
-    
-
-    
   }, [state])
 
   useEffect(()=>{
@@ -67,38 +66,101 @@ function App() {
 
   return (
       <Routes>
-        <Route path='/' element={<Login token={token} uris={selectedMusic} musics={musics} setSelected={ (e) => setSelected(e)} />} />
+        <Route path='/' element={<Home token={token} uris={selectedMusic} musics={musics} setSelected={ (e) => setSelected(e)} />} />
         <Route path='/callback' element={<Callback />}/>
       </Routes>
   );
 }
 
-function Login({token, uris, musics, setSelected}){
+function Home({token, uris, musics, setSelected}){
+
+  const handlePlay = (e) => {
+    try{
+      e.target.childNodes[0].cells[0].childNodes[0].innerHTML = "Play"
+    }
+    catch{
+    }
+  }
+
+  const handleLeave = (e, i) =>{
+    try{
+      e.target.childNodes[0].cells[0].childNodes[0].innerHTML = i + 1
+    }
+    catch{
+    }
+  }
+
   return(
     <div className="App">
-      <a 
-      href={authLink}>
+      {!token ? 
+      <a href={authLink}>
         Logar com Spotify
-      </a>
+      </a>: ''}
       <div className="musics">
-        {musics?.map((musica, i) =>{
-          return(
-            <button onClick={() => setSelected([musica.track.uri])} key={i}>
-              <img src={musica.track.album.images[2].url} alt={musica.track.name}/>
-              <h2>Música: {musica.track.name}</h2>
-            </button>
-          )
-        })}
+        <table border={0}>
+          <thead>
+            <tr>
+              <th className='header_button'>#</th>
+              <th className='header_title'>Título</th>
+              <th className='header_album'>Álbum</th>
+              <th className='header_added'>Adicionado em</th>
+              <th className='header_time'>Duração</th>
+            </tr>
+          </thead>
+          <tbody>
+            {musics?.map((musica, i) =>{
+            return(
+              <div className="track" onMouseEnter={handlePlay} onMouseLeave={(e) => handleLeave(e, i)}>
+                <tr>
+                <td className='play_button header_button'>
+                  <button onClick={() => setSelected([musica.track.uri])} key={i}>
+                    {i + 1}
+                  </button>
+                </td>
+                <td className='header_title'>
+                  <div className="music_infos">
+                    <div className="img">
+                      <img src={musica.track.album.images[2].url} alt={musica.track.name}/>
+                    </div>
+                    <div className="music_title_artits">
+                      <span className='music_name'>{musica.track.name}</span>
+                      <span className='artist_name'>{musica.track.artists.map(artists => artists.name)}</span>
+                    </div>
+                  </div>
+                </td>
+                <td className='header_album'>
+                  <span className="album_name">{musica.track.album.name}</span>
+                </td>
+                <td className='header_added'>
+                  {musica.added_at}
+                </td>
+                <td className='header_time'>
+                  {musica.track.duration_ms}
+                </td>
+              </tr>
+              </div>
+            )
+            })}
+          </tbody>
+        </table>
       </div>
-      <SpotifyPlayer 
-        token={token}
-        uris={uris}
-        initialVolume={0.1}
-        inlineVolume={true}
-        layout='responsive'
-        magnifySliderOnHover={true}
-        play={true}
-      /> 
+      <div className="player">
+        <SpotifyPlayer 
+          token={token}
+          uris={uris}
+          initialVolume={0.1}
+          inlineVolume={true}
+          layout='responsive'
+          magnifySliderOnHover={true}
+          play={true}
+          styles={{
+            bgColor: "#242424",
+            color: "white",
+            trackNameColor: "white",
+            trackArtistColor: "grey"
+          }}
+        /> 
+      </div>
     </div>
   )
 }
