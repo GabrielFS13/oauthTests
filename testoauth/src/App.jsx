@@ -54,8 +54,7 @@ function App() {
     .then(resp => {
       setApiUrl(resp?.next)
       setMusics([...musics, ...resp?.items])
-
-      console.log(musics)
+      //console.log(musics)
       //console.log(resp) 
     })
     .catch(err => console.log(err))
@@ -68,6 +67,7 @@ function App() {
         <Route path='/' element={
           <Collection
             token={token} 
+            playlist={musics.map(musica => musica.track.uri)}
             uris={selectedMusic} 
             musics={musics} 
             setSelected={ (e) => setSelected(e)}
