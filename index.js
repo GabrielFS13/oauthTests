@@ -71,5 +71,5 @@ app.get("/refresh/:code", cors(), (req, res)=>{
 
 
 app.listen(PORT, ()=>{
-    console.log("Ouvindo...")
+    console.log("Ouvindo.")
 })
